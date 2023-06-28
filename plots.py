@@ -6,23 +6,15 @@ import matplotlib.pyplot as plt
 
 class PendulumPlot:
 
-    def __init__(self, pendulum, t):
+    def __init__(self, pendulum):
         self.pendulum = pendulum
-        self.t = t
-        self.solution = odeint(self.pendulum.state_eqn, self.pendulum.state0, self.t)
 
-    def energy_plot(self):
-        kinetic_energy = self.pendulum.kinetic_energy(self.solution[:, 1])
-        potential_energy = self.pendulum.potential_energy(self.solution[:, 0])
-
-        plt.figure()
-        plt.plot(self.t, kinetic_energy, label='Kinetic Energy')
-        plt.plot(self.t, potential_energy, label='Potential Energy')
-        plt.xlabel('t')
-        plt.ylabel('Energy')
+    def plot(self):
+        plt.plot(self.pendulum.t, self.pendulum.kinetic, label='Кинетическая')
+        plt.plot(self.pendulum.t, self.pendulum.potential, label='Потенциальная')
+        plt.xticks(np.arange(1, 10, 2))
         plt.title('Energy vs time')
-        plt.legend()
-        plt.savefig('energy-time.png')
+        plt.savefig('energy_time.png')
         plt.show()
 
 

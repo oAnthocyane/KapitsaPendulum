@@ -1,27 +1,32 @@
 import numpy as np
-
+from scipy.integrate import odeint
 
 class Pendulum:
-
-    def __init__(self, m, l, g, delta, gamma, omega_mult, state0):
+    def __init__(self, m, l, g, a, omega, state0, t):
         self.m = m
         self.l = l
         self.g = g
-        self.delta = delta
-        self.gamma = gamma
-        self.omega = omega_mult * np.sqrt(g / l)
+        self.a = a
+        self.omega = omega
         self.state0 = state0
+        self.t = t
+        self.nu = np.sqrt(g / l)
 
-    def state_eqn(self, y, t):
-        x, dx = y
-        dydt = [dx, -self.delta*dx - np.sin(x) + self.gamma*np.cos(self.omega*t)/(self.m*self.l)]
-        return dydt
+    def state_eqn(self, state, t):
+        phi, phidot = state
+        phidotdot = -(self.a*self.omega**2*np.cos(self.omega*t) + self.g)*np.sin(phi) / self.l
+        return phidot, phidotdot
 
-    def kinetic_energy(self, dx):
-        return 0.5*self.m*self.l**2*dx**2
+    def energy(self, state, t):
+        phi, phidot = state
+        kinetic = 0.5*self.m*(self.l*phidot)**2 + self.m*self.a*self.omega*np.sin(self.omega*t)*self.l*phidot*np.sin(phi) + 0.5*self.m*self.a**2*self.omega**2*np.sin(self.omega*t)**2
+        potential = -self.m*self.g*(self.l*np.cos(phi) + self.a*np.cos(self.omega*t))
+        return kinetic, potential
 
-    def potential_energy(self, x):
-        return self.m*self.g*self.l*(1-np.cos(x))
+    def solve(self):
+        self.state = odeint(self.state_eqn, self.state0, self.t)
+        self.kinetic, self.potential = np.array([self.energy(s, t) for s, t in zip(self.state, self.t)]).T
+
 
 
 class AmplitudePendulum:
